@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.*;
 import javax.swing.BorderFactory;
@@ -33,11 +34,16 @@ public class SudokuGUI extends JFrame implements ActionListener{
 	    //Nine subGrids in mainGrid
 	    for (int i = 0; i < 9; ++i) {
 			subGrid = new JPanel(new GridLayout(3, 3));
+			int row, col;
 			//Nine buttons per subGrid
-			for ( int j = 0; j < 9; j++ ) {
-				gridButtons[i][j] = new MyJButton(" ");
-				gridButtons[i][j].addActionListener(new GridButtonListener());
-				subGrid.add( gridButtons[i][j] );
+			for (int j = 0; j < 3; ++j) {
+				row = (i/3)*3 + j;
+				for (int k = 0; k < 3; ++k) {
+					col = (i%3)*3 + k;
+					gridButtons[row][col] = new MyJButton(" ");
+					gridButtons[row][col].addActionListener(new GridButtonListener());
+					subGrid.add( gridButtons[row][col] );
+				}
 			}
 			mainGrid.add(subGrid);
 		}
@@ -100,7 +106,7 @@ public class SudokuGUI extends JFrame implements ActionListener{
 	    	    				e.printStackTrace();
 	    	    			}
 	    	    		
-	    	    		}//end of if statement
+	    	    		}
 		            }
 	    		}
 	    		);
@@ -111,6 +117,75 @@ public class SudokuGUI extends JFrame implements ActionListener{
 	    setVisible( true );
 
 		
+	}
+	
+	public boolean checkWin(MyJButton buttons[][]) {
+		boolean array[] = new boolean[9];
+		boolean duplicate = false;
+		boolean unfinished = false;
+		
+		//Check rows for duplicate numbers or unfinished
+		for(int row = 0; row < 9; ++row) {
+			Arrays.fill(array, false);
+			for(int col = 0; col < 9; ++col) {	
+				if (buttons[row][col].getNumber() > 0) {
+					if (array[buttons[row][col].getNumber() - 1] == true) {		
+						return false;
+					}
+					else array[buttons[row][col].getNumber() - 1] = true;
+				}
+				
+			}
+			//if (duplicate == true) break;
+			for (boolean value : array) {
+		        if (!value) {
+		        	return false;
+		        }
+		    }		
+		} 
+		
+		
+		//Check columns for duplicate numbers or unfinished
+		for(int col = 0; col < 9; ++col) {
+			Arrays.fill(array, false);
+			for(int row = 0; row < 9; ++row) {
+				System.out.println("buttons[ " + row + " ][ " + col + " ] = " + buttons[row][col].getNumber());
+				System.out.println("Text is: " + buttons[row][col].getText());
+				if (buttons[row][col].getNumber() > 0) {
+					if (array[buttons[row][col].getNumber() - 1] == true) {
+						return false;
+					}
+					else array[buttons[row][col].getNumber() - 1] = true;
+				}
+				
+			}
+			for (boolean value : array) {
+		        if (!value) {
+		        	return false;
+		        }
+		    }
+		} 
+		
+		
+		//Check subgrids for duplicate numbers
+		for (int grid = 0; grid < 9; ++grid) {
+			Arrays.fill(array, false);
+			int row, col;
+			for (int i = 0; i < 3; ++i) {
+				row = (grid/3)*3 + i;
+				for (int j = 0; j < 3; ++j) {
+					col = (grid%3)*3 + j;
+					if (buttons[row][col].getNumber() > 0) {
+						if (array[buttons[row][col].getNumber() - 1] == true) {
+							return false;
+						}
+						else array[buttons[row][col].getNumber() - 1] = true;
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	public static void main( String args[] ) { 
@@ -131,6 +206,9 @@ public class SudokuGUI extends JFrame implements ActionListener{
 				else {
 					selectedBox.setText(Integer.toString(selectedNum));
 					selectedBox.setNumber(selectedNum);
+					if(checkWin(gridButtons))
+						JOptionPane.showMessageDialog( SudokuGUI.this, "WIN!",
+							"Status", JOptionPane.PLAIN_MESSAGE );
 				}	
 			}
 			selectedNum = 0;
@@ -153,6 +231,9 @@ public class SudokuGUI extends JFrame implements ActionListener{
         						else {
         							gridButtons[i][j].setText(Integer.toString(selectedNum));
             						gridButtons[i][j].setNumber(selectedNum);
+            						if(checkWin(gridButtons))
+            							JOptionPane.showMessageDialog( SudokuGUI.this, "WIN!",
+            									"Status", JOptionPane.PLAIN_MESSAGE );
         						}
         						
         					}
@@ -167,5 +248,5 @@ public class SudokuGUI extends JFrame implements ActionListener{
         	}
         }
         
- }
+	}
 }
